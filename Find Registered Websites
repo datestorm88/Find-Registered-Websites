@@ -1,0 +1,36 @@
+import requests
+
+def find_registered_websites(email):
+    """
+    This function takes an email address as an argument and returns a list of websites that the email is registered to.
+    
+    Parameters:
+    email (str): The email address to search
+    
+    Returns:
+    list: A list of websites that the email is registered to
+    """
+    try:
+        # Check if the email is valid
+        if "@" not in email:
+            raise ValueError("Invalid email address")
+        
+        # Send a request to the Have I Been Pwned API to get the list of breaches
+        url = f"https://haveibeenpwned.com/api/v3/breachedaccount/{email}"
+        headers = {"hibp-api-key": "YOUR_API_KEY_HERE"}
+        response = requests.get(url, headers=headers)
+        
+        # Check if the email has been breached
+        if response.status_code == 404:
+            return ["This email has not been found in any data breaches"]
+        elif response.status_code == 200:
+            # Extract the list of websites from the response
+            breaches = response.json()
+            websites = [breach["Domain"] for breach in breaches]
+            return websites
+        else:
+            raise Exception("An error occurred while searching for the email")
+    except Exception as e:
+        # Log the error
+        print(f"Error: {e}")
+        return []  # Return an empty list if there was an error
